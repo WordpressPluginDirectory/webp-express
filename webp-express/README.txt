@@ -3,8 +3,8 @@ Contributors: rosell.dk
 Donate link: https://ko-fi.com/rosell
 Tags: webp, images, performance
 Requires at least: 4.0
-Tested up to: 6.5
-Stable tag: 0.25.9
+Tested up to: 6.9
+Stable tag: 0.25.12
 Requires PHP: 5.6
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -173,14 +173,19 @@ Bread on the table don't come for free, even though this plugin does, and always
 
 **Persons who recently contributed with [ko-fi](https://ko-fi.com/rosell) - Thanks!**
 
-* 3 Nov: Tobi
-* 5 Nov: Anon
-* 18 Nov: Oleksii
-* 20 Feb: Assen Kovatchev
-* 22 Feb: Peter
-* 29 Feb: Luis Méndez Alejo
-* 5 Mar: tomottoe
-* 9 Mar: La Braud
+* 16 Dec: Dragos
+* 9 Aug: Tanzi
+* 3 Jul: Jen
+* 26 Jun: Per
+* 16 May: Erick Danzer
+* 8 May: Mike
+* 31 May: parallactic
+* 14 May: Gitte Rebsdorf
+* 9 May: La Braud
+
+**Persons who recently contributed on [github sponsors](https://github.com/sponsors/rosell-dk) - Thanks!**
+* 16 Dec: kcrlost
+* 16 Dec: Yakovos Frountas (Greece)
 
 **Persons who contributed with extra generously amounts of coffee / lifetime backing (>30$) - thanks!:**
 
@@ -195,10 +200,6 @@ Bread on the table don't come for free, even though this plugin does, and always
 * Erica Dreisbach ($50)
 * Brian Laursen ($50)
 * Dimitris Vayenas ($50)
-
-**Persons currently backing the project via GitHub Sponsors or patreon - Thanks!**
-
-* [Mathieu Gollain-Dupont](https://www.linkedin.com/in/mathieu-gollain-dupont-9938a4a/)
 
 == Frequently Asked Questions ==
 
@@ -345,6 +346,13 @@ For multisite on NGINX, read [here](https://github.com/rosell-dk/webp-express/is
 __Preparational step:__
 The rules looks for existing webp files by appending ".webp" to the URL. So for this to work, you must configure *WebP Express* to store the converted files like that by setting *General > File extension* to *Append ".webp"*
 
+__Preparational step 2:__
+From 0.25.10 and up, the configuration file has been renamed so the filename contains a "hash" of random characters (a security meassure).
+You will have to find the hash by inspecting the filename of the config file.
+Look in the /wp-content/webp-express/config folder for a file called something like "config.c513fe386c6b8793f9bf9ad1071d2266.json".
+The string of random characters between "config." and ".json" is what we here call the "hash".
+You will need to use that string of characters instead of "[your-hash-here]" in the rules suggested below.
+
 __The rules:__
 Insert the following in the `server` context of your configuration file (usually found in `/etc/nginx/sites-available`). "The `server` context" refers to the part of the configuration that starts with "server {" and ends with the matching "}".
 
@@ -360,7 +368,7 @@ location ~* ^/?wp-content/.*\.(png|jpe?g)$ {
   try_files
     /wp-content/webp-express/webp-images/doc-root/$uri.webp
     $uri.webp
-    /wp-content/plugins/webp-express/wod/webp-on-demand.php?xsource=x$request_filename&wp-content=wp-content
+    /wp-content/plugins/webp-express/wod/webp-on-demand.php?xsource=x$request_filename&wp-content=wp-content&hash=[your-hash-here]
     ;
 }
 
@@ -368,7 +376,7 @@ location ~* ^/?wp-content/.*\.(png|jpe?g)$ {
 location ~* ^/?wp-content/.*\.(png|jpe?g)\.webp$ {
     try_files
       $uri
-      /wp-content/plugins/webp-express/wod/webp-realizer.php?xdestination=x$request_filename&wp-content=wp-content
+      /wp-content/plugins/webp-express/wod/webp-realizer.php?xdestination=x$request_filename&wp-content=wp-content&hash=[your-hash-here]
       ;
 }
 &#35; ------------------- (WebP Express rules ends here)
@@ -433,7 +441,7 @@ if ($whattodo = AB) {
     rewrite ^(.*) $1.webp last;
 }
 if ($whattodo = A) {
-    rewrite ^/wp-content/.*\.(jpe?g|png)$ /wp-content/plugins/webp-express/wod/webp-on-demand.php?xsource=x$request_filename&wp-content=wp-content break;
+    rewrite ^/wp-content/.*\.(jpe?g|png)$ /wp-content/plugins/webp-express/wod/webp-on-demand.php?xsource=x$request_filename&wp-content=wp-content&hash=[your-hash-here] break;
 }
 &#35; ------------------- (WebP Express rules ends here)
 ```
@@ -475,7 +483,7 @@ location ~* ^/wp-content/.*\.(png|jpe?g)$ {
         rewrite ^(.*) $1.webp last;
     }
     if ($whattodo = A) {
-        rewrite ^/wp-content/.*\.(jpe?g|png)$ /wp-content/plugins/webp-express/wod/webp-on-demand.php?xsource=x$request_filename&wp-content=wp-content last;
+        rewrite ^/wp-content/.*\.(jpe?g|png)$ /wp-content/plugins/webp-express/wod/webp-on-demand.php?xsource=x$request_filename&wp-content=wp-content&hash=[your-hash-here] last;
     }
 }
 
@@ -494,7 +502,7 @@ PS: In case you only want to redirect images to the script (and not to existing)
 &#35; WebP Express rules
 &#35; --------------------
 if ($http_accept ~* "webp"){
-  rewrite ^/(.*).(jpe?g|png)$ /wp-content/plugins/webp-express/wod/webp-on-demand.php?xsource=x$request_filename&wp-content=wp-content break;
+  rewrite ^/(.*).(jpe?g|png)$ /wp-content/plugins/webp-express/wod/webp-on-demand.php?xsource=x$request_filename&wp-content=wp-content&hash=[your-hash-here] break;
 }
 &#35; ------------------- (WebP Express rules ends here)
 `
@@ -504,6 +512,12 @@ And here: https://github.com/rosell-dk/webp-express/issues/166
 
 Here are rules if you need to *replace* the file extension with ".webp" rather than appending ".webp" to it: https://www.keycdn.com/support/optimus/configuration-to-deliver-webp
 
+### Important: WebP On Demand on NGINX now requires a hash parameter
+
+Recent versions of WebP Express (0.25.10 and up) require an instance-specific hash parameter
+when using WebP On Demand.
+
+```
 = I am on a Windows server =
 Good news! It should work now, thanks to a guy that calls himself lwxbr. At least on XAMPP 7.3.1, Windows 10. https://github.com/rosell-dk/webp-express/pull/213.
 
@@ -818,6 +832,17 @@ If you want to make sure that my coffee supplies don't run dry, you can even buy
 
 == Changelog ==
 
+= 0.25.12 =
+(released 22 December 2025)
+* Added notification for users on Nginx which uses redirect rules to change their rewrite rules manually. They must now pass a "hash" parameter in the querystring to the WebP conversion script
+
+= 0.25.11 =
+(released 22 December 2025)
+* Fixes .htaccess rules for redirecting to converter. The bug was introduced in 0.25.10. It caused the conversion not to work on some systems. Thanks to Jon Wallace for reporting the issue on github and assisting in the debugging.
+
+(released 15 December 2025)
+* Security fix: Config file was exposed on systems running on NGINX. Herr Patrick Müller from Switzerland for creating a patch as well as Rune Philosof from Denmark for improving it. Some credit also goes to myself for perfecting the patch. Sorry for slacking on the maintenance. There are good reasons for this, but I can and will do better in the future
+
 = 0.25.9 =
 (released 7 April 2024)
 * Bugfix: Fixed ewww conversion method after ewww API change
@@ -866,6 +891,15 @@ If you want to make sure that my coffee supplies don't run dry, you can even buy
 For older releases, check out changelog.txt
 
 == Upgrade Notice ==
+
+= 0.25.12 =
+* Added notification for users on Nginx which uses redirect rules to change their rewrite rules to point to the new configuration file containing randomized characters
+
+= 0.25.11 =
+* Bugfix. Fixes .htaccess rules for redirecting to converter. The bug was introduced in 0.25.10. It caused the conversion not to work on some systems
+
+= 0.25.10 =
+* Security fix. The config file could be exposed on NGINX
 
 = 0.25.9 =
 * Fixed ewww conversion method after ewww API change
