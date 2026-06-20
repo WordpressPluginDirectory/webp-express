@@ -52,6 +52,7 @@ https://pippinsplugins.com/how-to-properly-format-and-enhance-your-plugins-readm
 - Skim: https://codex.wordpress.org/Writing_a_Plugin
 - https://developer.wordpress.org/plugins/wordpress-org/
 - Validate the readme: https://wordpress.org/plugins/developers/readme-validator/
+- Update contributions sections in `README.txt` as well as `README.md`
 - Make sure you have pushed the latest commits to github
 - Make sure you have released the new version on github
 
@@ -111,12 +112,12 @@ svn status | grep '^!' | awk '{print $2}' | xargs svn delete --force          (t
 Then add a new tag
 ```
 cd svn
-svn cp trunk tags/0.25.11       (this will copy trunk into a new tag)
+svn cp trunk tags/0.25.14       (this will copy trunk into a new tag)
 ```
 
 And commit!
 ```
-svn ci -m '0.25.11'
+svn ci -m '0.25.14'
 ```
 
 
